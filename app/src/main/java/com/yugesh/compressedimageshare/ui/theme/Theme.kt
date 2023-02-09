@@ -4,6 +4,9 @@ import androidx.annotation.RequiresPermission
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -20,14 +23,15 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 val CompressedImageSharingColorPalette = CompressedImageSharingColors(
-    uiBackgroundPrimary = white,
+    uiBackgroundPrimary = ui_background_primary,
     uiBackgroundSecondary = black,
     uiBackgroundTertiary = bg_tertiary,
     uiBackgroundGradient = listOf(bg_gradient_color_one, bg_gradient_color_two),
-    textPrimary = black,
-    textSecondary = white,
+    textPrimary = white,
+    textSecondary = black,
     textTertiary = gray_88,
     buttonBackground = button_bg_primary,
+    buttonBackgroundGradient = listOf(button_gradient_color_one, button_gradient_color_three),
     error = error,
     uiBorder = black
 )
@@ -45,7 +49,7 @@ fun CompressedImageSharingTheme(
     colorPalette.update(other = colors)
 
     SideEffect {
-        systemUiController.setSystemBarsColor(color = bg_gradient_color_one)
+        systemUiController.setSystemBarsColor(color = ui_background_primary)
     }
 
     CompositionLocalProvider(
@@ -56,10 +60,30 @@ fun CompressedImageSharingTheme(
         MaterialTheme(
             typography = debugTypography(),
             shapes = Shapes,
-            colors = debugColors(false),
-            content = content
-        )
+            colors = debugColors(false)
+        ) {
+            CompositionLocalProvider(
+                LocalRippleTheme provides RippleCustomTheme,
+                content = content
+            )
+        }
     }
+}
+
+private object RippleCustomTheme: RippleTheme {
+    @Composable
+    override fun defaultColor() =
+        RippleTheme.defaultRippleColor(
+            gray_88,
+            lightTheme = true
+        )
+
+    @Composable
+    override fun rippleAlpha(): RippleAlpha =
+        RippleTheme.defaultRippleAlpha(
+            gray_88,
+            lightTheme = true
+        )
 }
 
 object CompressedImageSharingTheme {
@@ -89,6 +113,7 @@ class CompressedImageSharingColors(
     textSecondary: Color,
     textTertiary: Color,
     buttonBackground: Color,
+    buttonBackgroundGradient: List<Color>,
     error: Color,
     uiBorder: Color
 ) {
@@ -108,6 +133,8 @@ class CompressedImageSharingColors(
         private set
     var buttonBackground by mutableStateOf(buttonBackground)
         private set
+    var buttonBackgroundGradient by mutableStateOf(buttonBackgroundGradient)
+        private set
     var error by mutableStateOf(error)
         private set
     var uiBorder by mutableStateOf(uiBorder)
@@ -122,6 +149,7 @@ class CompressedImageSharingColors(
         textSecondary = other.textSecondary
         textTertiary = other.textTertiary
         buttonBackground = other.buttonBackground
+        buttonBackgroundGradient = other.buttonBackgroundGradient
         error = other.error
         uiBorder = other.uiBorder
     }
@@ -135,6 +163,7 @@ class CompressedImageSharingColors(
         textSecondary = textSecondary,
         textTertiary = textTertiary,
         buttonBackground = buttonBackground,
+        buttonBackgroundGradient = buttonBackgroundGradient,
         error = error,
         uiBorder = uiBorder
     )

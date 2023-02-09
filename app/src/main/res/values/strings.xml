@@ -3,6 +3,10 @@
     <string name="no_app_available">No App Available</string>
     <string name="share_compressed_images">Share Compressed Images</string>
     <string name="select_images_from_gallery">Select Images from Gallery</string>
+    <string name="select_images_more_from_gallery">Select More Images from Gallery</string>
     <string name="add_button">Add Button</string>
     <string name="selected_image">Selected Image</string>
+    <string name="share_image">Share Image</string>
+    <string name="share_images">Share Images</string>
+    <string name="remove_image">Remove Image</string>
 </resources>

@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
@@ -40,6 +41,8 @@ class HomeViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider
 ) : ViewModel() {
 
+    var selectedImages: MutableList<CompressedFile> = mutableStateListOf()
+
     // Home Screen Ui State
     private val _homeScreenUiState =
         MutableStateFlow(HomeScreenUiState(loading = false))
@@ -56,12 +59,22 @@ class HomeViewModel @Inject constructor(
                 uriList = uriList,
                 context = context
             ).await()
+            selectedImages += compressedImagesList
             _homeScreenUiState.update {
                 it.copy(
-                    compressedImages = compressedImagesList,
+                    compressedImages = selectedImages,
                     loading = false
                 )
             }
+        }
+    }
+
+    fun removeImage(index: Int){
+        selectedImages.removeAt(index = index)
+        _homeScreenUiState.update {
+            it.copy(
+                compressedImages = selectedImages
+            )
         }
     }
 
