@@ -4,11 +4,13 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,8 +19,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -105,13 +109,30 @@ fun HomeScreen(
                 ),
                 photoPickerLauncher = photoPickerLauncher
             )
-            SelectedImagesGrid(
-                compressedImagesList = selectedCompressedImages,
-                onRemoveClick = { index ->
-                    viewModel.removeImage(index = index)
-                }
-            )
 
+            AnimatedVisibility(visible = selectedCompressedImages.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.placeholder_image),
+                        contentDescription = stringResource(R.string.placeholder_image),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(300.dp)
+                    )
+                }
+            }
+            AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
+                SelectedImagesGrid(
+                    compressedImagesList = selectedCompressedImages,
+                    onRemoveClick = { index ->
+                        viewModel.removeImage(index = index)
+                    }
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
     }

@@ -9,4 +9,5 @@
     <string name="share_image">Share Image</string>
     <string name="share_images">Share Images</string>
     <string name="remove_image">Remove Image</string>
+    <string name="placeholder_image">Placeholder Image</string>
 </resources>
