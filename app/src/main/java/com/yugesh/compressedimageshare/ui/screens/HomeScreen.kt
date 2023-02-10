@@ -53,7 +53,7 @@ fun HomeScreen(
         mutableStateOf<List<Uri>>(emptyList())
     }
     val photoPickerLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(10)
+        ActivityResultContracts.PickMultipleVisualMedia(30)
     ) { uri ->
         selectedImages = uri
     }
