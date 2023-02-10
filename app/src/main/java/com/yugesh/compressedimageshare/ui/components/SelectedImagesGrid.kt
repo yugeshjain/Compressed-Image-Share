@@ -3,6 +3,7 @@ package com.yugesh.compressedimageshare.ui.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,12 +42,18 @@ fun SelectedImagesGrid(
     LazyVerticalStaggeredGrid(
         modifier = modifier,
         columns = StaggeredGridCells.Fixed(2),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         content = {
-            itemsIndexed(compressedImagesList) { index, compressedFile ->
+            itemsIndexed(
+                items = compressedImagesList,
+                key = { key, _ ->
+                    key
+                }
+            ) { index, compressedFile ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(4.dp)
                         .clip(shape = RoundedCornerShape(8.dp))
                         .background(color = CompressedImageSharingTheme.colors.uiBackgroundPrimary)
                         .clickable {

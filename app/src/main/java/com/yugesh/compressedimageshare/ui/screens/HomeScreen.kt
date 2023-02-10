@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,8 +82,61 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        backgroundColor = CompressedImageSharingTheme.colors.uiBackgroundPrimary,
-        floatingActionButton = {
+        backgroundColor = CompressedImageSharingTheme.colors.uiBackgroundPrimary
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = paddingValues),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues = paddingValues)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                AddImagesBoxButton(
+                    buttonText = stringResource(
+                        if (selectedCompressedImages.isEmpty()) {
+                            R.string.select_images_from_gallery
+                        } else {
+                            R.string.select_images_more_from_gallery
+                        }
+                    ),
+                    photoPickerLauncher = photoPickerLauncher
+                )
+
+                AnimatedVisibility(visible = selectedCompressedImages.isEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.placeholder_image),
+                            contentDescription = stringResource(R.string.placeholder_image),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .size(300.dp)
+                        )
+                    }
+                }
+                AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
+                    SelectedImagesGrid(
+                        compressedImagesList = selectedCompressedImages,
+                        onRemoveClick = { index ->
+                            viewModel.removeImage(index = index)
+                        },
+                        onImageClick = { index ->
+                            viewModel.openDetailsDialog(index)
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+            }
+
             AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
                 ShareButton(
                     modifier = Modifier
@@ -107,53 +161,6 @@ fun HomeScreen(
                     }
                 )
             }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues = paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            AddImagesBoxButton(
-                buttonText = stringResource(
-                    if (selectedCompressedImages.isEmpty()) {
-                        R.string.select_images_from_gallery
-                    } else {
-                        R.string.select_images_more_from_gallery
-                    }
-                ),
-                photoPickerLauncher = photoPickerLauncher
-            )
-
-            AnimatedVisibility(visible = selectedCompressedImages.isEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.placeholder_image),
-                        contentDescription = stringResource(R.string.placeholder_image),
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .size(300.dp)
-                    )
-                }
-            }
-            AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
-                SelectedImagesGrid(
-                    compressedImagesList = selectedCompressedImages,
-                    onRemoveClick = { index ->
-                        viewModel.removeImage(index = index)
-                    },
-                    onImageClick = { index ->
-                        viewModel.openDetailsDialog(index)
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
