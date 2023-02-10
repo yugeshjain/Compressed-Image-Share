@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -107,59 +108,72 @@ fun HomeScreen(
                     ),
                     photoPickerLauncher = photoPickerLauncher
                 )
-
-                AnimatedVisibility(visible = selectedCompressedImages.isEmpty()) {
+                if (homeScreenUiState.loading) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.placeholder_image),
-                            contentDescription = stringResource(R.string.placeholder_image),
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .size(300.dp)
+                        CircularProgressIndicator(
+                            color = CompressedImageSharingTheme.colors.buttonBackground,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(40.dp)
                         )
                     }
-                }
-                AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
-                    SelectedImagesGrid(
-                        compressedImagesList = selectedCompressedImages,
-                        onRemoveClick = { index ->
-                            viewModel.removeImage(index = index)
-                        },
-                        onImageClick = { index ->
-                            viewModel.openDetailsDialog(index)
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-            }
-
-            AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
-                ShareButton(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp, horizontal = 24.dp),
-                    buttonText = stringResource(
-                        if (selectedCompressedImages.size == 1) {
-                            R.string.share_image
-                        } else {
-                            R.string.share_images
-                        }
-                    ),
-                    onClick = {
-                        coroutineScope.launch {
-                            val uriList =
-                                viewModel.getUriListAsync(compressedImages = selectedCompressedImages)
-                                    .await()
-                            viewModel.shareImage(
-                                uriList = uriList,
-                                context = context
+                } else {
+                    AnimatedVisibility(visible = selectedCompressedImages.isEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.placeholder_image),
+                                contentDescription = stringResource(R.string.placeholder_image),
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .size(300.dp)
                             )
                         }
                     }
-                )
+                    AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
+                        SelectedImagesGrid(
+                            compressedImagesList = selectedCompressedImages,
+                            onRemoveClick = { index ->
+                                viewModel.removeImage(index = index)
+                            },
+                            onImageClick = { index ->
+                                viewModel.openDetailsDialog(index)
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
+                    ShareButton(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp, horizontal = 24.dp),
+                        buttonText = stringResource(
+                            if (selectedCompressedImages.size == 1) {
+                                R.string.share_image
+                            } else {
+                                R.string.share_images
+                            }
+                        ),
+                        onClick = {
+                            coroutineScope.launch {
+                                val uriList =
+                                    viewModel.getUriListAsync(compressedImages = selectedCompressedImages)
+                                        .await()
+                                viewModel.shareImage(
+                                    uriList = uriList,
+                                    context = context
+                                )
+                            }
+                        }
+                    )
+                }
             }
         }
     }
