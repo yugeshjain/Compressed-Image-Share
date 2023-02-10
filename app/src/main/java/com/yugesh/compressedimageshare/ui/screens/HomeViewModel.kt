@@ -49,6 +49,17 @@ class HomeViewModel @Inject constructor(
     val homeScreenUiState: StateFlow<HomeScreenUiState> =
         _homeScreenUiState.asStateFlow()
 
+    private val _showDetailsDialog = MutableStateFlow<Pair<Boolean, Int?>>(Pair(false, null))
+    val showDetailsDialog: StateFlow<Pair<Boolean, Int?>> = _showDetailsDialog.asStateFlow()
+
+    fun openDetailsDialog(index: Int) {
+        _showDetailsDialog.value = Pair(true, index)
+    }
+
+    fun closeDetailDialog() {
+        _showDetailsDialog.value = Pair(true, null)
+    }
+
     fun compressImages(
         uriList: List<Uri>,
         context: Context
@@ -69,7 +80,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun removeImage(index: Int){
+    fun removeImage(index: Int) {
         selectedImages.removeAt(index = index)
         _homeScreenUiState.update {
             it.copy(

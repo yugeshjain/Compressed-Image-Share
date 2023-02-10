@@ -29,9 +29,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yugesh.compressedimageshare.R
 import com.yugesh.compressedimageshare.ui.components.AddImagesBoxButton
+import com.yugesh.compressedimageshare.ui.components.DetailsDialog
 import com.yugesh.compressedimageshare.ui.components.SelectedImagesGrid
 import com.yugesh.compressedimageshare.ui.components.ShareButton
 import com.yugesh.compressedimageshare.ui.theme.CompressedImageSharingTheme
+import com.yugesh.compressedimageshare.util.toKbOrMb
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,6 +44,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val homeScreenUiState by viewModel.homeScreenUiState.collectAsStateWithLifecycle()
+    val showDetailsDialog by viewModel.showDetailsDialog.collectAsStateWithLifecycle()
     val selectedCompressedImages = homeScreenUiState.compressedImages
 
     // Photo Picker
@@ -60,6 +63,20 @@ fun HomeScreen(
             uriList = selectedImages,
             context = context
         )
+    }
+
+    if (showDetailsDialog.first) {
+        showDetailsDialog.second?.let { ssIndex ->
+            DetailsDialog(
+                originalImageName = "Original File",
+                originalImageSize = selectedCompressedImages.get(index = ssIndex).originalSize.toKbOrMb(),
+                compressedImageName = "Compressed File",
+                compressedImageSize = selectedCompressedImages.get(index = ssIndex).compressedSize.toKbOrMb(),
+                onDismissRequest = {
+                    viewModel.closeDetailDialog()
+                }
+            )
+        }
     }
 
     Scaffold(
@@ -130,6 +147,9 @@ fun HomeScreen(
                     compressedImagesList = selectedCompressedImages,
                     onRemoveClick = { index ->
                         viewModel.removeImage(index = index)
+                    },
+                    onImageClick = { index ->
+                        viewModel.openDetailsDialog(index)
                     }
                 )
             }

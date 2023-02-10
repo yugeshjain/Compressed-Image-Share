@@ -2,6 +2,7 @@ package com.yugesh.compressedimageshare.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,17 +25,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.yugesh.compressedimageshare.R
 import com.yugesh.compressedimageshare.ui.screens.CompressedFile
 import com.yugesh.compressedimageshare.ui.theme.CompressedImageSharingTheme
-import com.yugesh.compressedimageshare.util.toKbOrMb
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun SelectedImagesGrid(
     onRemoveClick: (Int) -> Unit,
+    onImageClick: (Int) -> Unit,
     compressedImagesList: List<CompressedFile>,
     modifier: Modifier = Modifier
 ) {
@@ -49,7 +48,10 @@ fun SelectedImagesGrid(
                         .fillMaxWidth()
                         .padding(4.dp)
                         .clip(shape = RoundedCornerShape(8.dp))
-                        .background(color = CompressedImageSharingTheme.colors.uiBackgroundPrimary),
+                        .background(color = CompressedImageSharingTheme.colors.uiBackgroundPrimary)
+                        .clickable {
+                            onImageClick(index)
+                        },
                     contentAlignment = Alignment.TopEnd
                 ) {
                     Column {
@@ -57,16 +59,6 @@ fun SelectedImagesGrid(
                             model = compressedFile.uri,
                             contentDescription = stringResource(R.string.selected_image),
                             contentScale = ContentScale.FillBounds
-                        )
-                        Text(
-                            text = "Original Size: " + compressedFile.originalSize.toKbOrMb(),
-                            fontSize = 12.sp,
-                            color = CompressedImageSharingTheme.colors.textPrimary
-                        )
-                        Text(
-                            text = "Compressed Size: " + compressedFile.compressedSize.toKbOrMb(),
-                            fontSize = 12.sp,
-                            color = CompressedImageSharingTheme.colors.textPrimary
                         )
                     }
 
@@ -103,7 +95,8 @@ private fun SelectedImagesGridPreview() {
     CompressedImageSharingTheme {
         SelectedImagesGrid(
             onRemoveClick = {},
-            compressedImagesList = emptyList()
+            compressedImagesList = emptyList(),
+            onImageClick = {}
         )
     }
 }
