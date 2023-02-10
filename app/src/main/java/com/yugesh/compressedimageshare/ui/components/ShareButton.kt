@@ -59,6 +59,23 @@ fun ShareButton(
                 )
             }
         )
+
+        Button(
+            modifier = Modifier.padding(start = 20.dp),
+            colors = ButtonDefaults.buttonColors(backgroundColor = CompressedImageSharingTheme.colors.buttonBackground),
+            shape = CircleShape,
+            onClick = onClick,
+            content = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_share),
+                    tint = CompressedImageSharingTheme.colors.textPrimary,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(20.dp)
+                )
+            }
+        )
     }
 }
 
