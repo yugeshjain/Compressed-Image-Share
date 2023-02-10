@@ -149,31 +149,30 @@ fun HomeScreen(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                 }
-
-                AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
-                    ShareButton(
-                        modifier = Modifier
-                            .padding(vertical = 8.dp, horizontal = 24.dp),
-                        buttonText = stringResource(
-                            if (selectedCompressedImages.size == 1) {
-                                R.string.share_image
-                            } else {
-                                R.string.share_images
-                            }
-                        ),
-                        onClick = {
-                            coroutineScope.launch {
-                                val uriList =
-                                    viewModel.getUriListAsync(compressedImages = selectedCompressedImages)
-                                        .await()
-                                viewModel.shareImage(
-                                    uriList = uriList,
-                                    context = context
-                                )
-                            }
+            }
+            AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
+                ShareButton(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp, horizontal = 24.dp),
+                    buttonText = stringResource(
+                        if (selectedCompressedImages.size == 1) {
+                            R.string.share_image
+                        } else {
+                            R.string.share_images
                         }
-                    )
-                }
+                    ),
+                    onClick = {
+                        coroutineScope.launch {
+                            val uriList =
+                                viewModel.getUriListAsync(compressedImages = selectedCompressedImages)
+                                    .await()
+                            viewModel.shareImage(
+                                uriList = uriList,
+                                context = context
+                            )
+                        }
+                    }
+                )
             }
         }
     }
