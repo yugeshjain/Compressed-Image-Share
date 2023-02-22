@@ -58,7 +58,7 @@ fun AddImagesBoxButton(
             Icon(
                 painter = painterResource(id = R.drawable.ic_add),
                 tint = CompressedImageSharingTheme.colors.textPrimary,
-                contentDescription = stringResource(R.string.add_button),
+                contentDescription = stringResource(R.string.add_images),
                 modifier = Modifier
                     .padding(bottom = 4.dp)
             )

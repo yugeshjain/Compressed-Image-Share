@@ -8,6 +8,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 val Typography = CompressedImageSharingTypography(
+    title = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 24.sp,
+        letterSpacing = 2.sp,
+        color = white
+    ),
     body1 = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -18,7 +25,8 @@ val Typography = CompressedImageSharingTypography(
 
 @Immutable
 data class CompressedImageSharingTypography(
-    val body1: TextStyle
+    val body1: TextStyle,
+    val title: TextStyle
 )
 
 inline val LocalTypography
