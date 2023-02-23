@@ -1,25 +1,9 @@
 package com.yugesh.compressedimageshare.util.inappupdates
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.content.IntentSender
-import android.graphics.Color
-import android.util.Log
-import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -29,8 +13,6 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.yugesh.compressedimageshare.BuildConfig
-import com.yugesh.compressedimageshare.ui.screens.HomeViewModel
-import com.yugesh.compressedimageshare.ui.theme.white
 
 /**
  * In app update manager
@@ -40,12 +22,13 @@ import com.yugesh.compressedimageshare.ui.theme.white
  * @param activity
  * @param updateType specifies FORCED, FLEXIBLE, NO_UPDATES or LOADING
  * @param updateVersion is the new version code fetched from Remote Config
+ * @param onFlexibleUpdateDownloaded is a callback that send a boolean to show a snackbar on successfull update download
  */
 class InAppUpdateManager(
     activity: Activity,
     updateType: AppUpdateState,
     updateVersion: Long,
-    viewModel: HomeViewModel
+    private val onFlexibleUpdateDownloaded: (Boolean) -> Unit
 ) : InstallStateUpdatedListener {
 
     private var appUpdateManager: AppUpdateManager
@@ -92,12 +75,6 @@ class InAppUpdateManager(
                                     appUpdateInfo = appUpdateInfo,
                                     updateType = AppUpdateType.FLEXIBLE
                                 )
-//                                if (appUpdateInfo.installStatus() == InstallStatus.INSTALLING) {
-//                                    appUpdateManager.registerListener(listener)
-//                                }
-//                                if (appUpdateInfo.installStatus() == InstallStatus.INSTALLED) {
-//                                    appUpdateManager.unregisterListener(listener)
-//                                }
                             }
                         }
 
@@ -113,6 +90,9 @@ class InAppUpdateManager(
         appUpdateManager.registerListener(this)
     }
 
+    /* Starts an update based the type of updates available,
+       which are Immediate or Flexible
+     */
     private fun startUpdate(
         appUpdateInfo: AppUpdateInfo,
         updateType: Int
@@ -128,89 +108,49 @@ class InAppUpdateManager(
             currentType = updateType
         } catch (e: IntentSender.SendIntentException) {
             e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
-    fun onResume(viewModel: HomeViewModel) {
+    /* Handles the cases if a user goes to background
+       and opens the app again while updating
+       This is called in the onResume() of MainActivity
+    * */
+    fun onResume() {
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-            if (currentType == AppUpdateType.FLEXIBLE) {
-                if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                    viewModel.something.value = true
-//                    showCompleteUpdateDialog()
+            when (currentType) {
+                AppUpdateType.FLEXIBLE -> {
+                    if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                        onFlexibleUpdateDownloaded(true)
+                    }
                 }
-            } else if (currentType == AppUpdateType.IMMEDIATE) {
-                if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
-                    startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE)
+
+                AppUpdateType.IMMEDIATE -> {
+                    if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                        startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE)
+                    }
                 }
             }
         }
     }
 
-    fun showCompleteUpdateDialog() {
-        AlertDialog.Builder(parentActivity)
-            .setTitle("Update Downloaded")
-            .setMessage("An Update has been downloaded. Would you like to install it now?")
-            .setPositiveButton("yes") { _, _ ->
-                appUpdateManager.completeUpdate()
-            }
-            .setNegativeButton("No", null)
-            .show()
-    }
-
-    private fun flexibleUpdateDownloadCompleted() {
-        AlertDialog.Builder(parentActivity)
-            .setTitle("Update Downloaded")
-            .setMessage("An Update has been downloaded. Would you like to install it now?")
-            .setPositiveButton("yes") { _, _ ->
-                appUpdateManager.completeUpdate()
-            }
-            .setNegativeButton("No", null)
-            .show()
-//        Snackbar.make(
-//            parentActivity.window.decorView.rootView,
-//            "An update has just been downloaded.",
-//            Snackbar.LENGTH_INDEFINITE
-//        ).apply {
-//            setAction("RESTART") { appUpdateManager.completeUpdate() }
-//            setActionTextColor(Color.WHITE)
-//            show()
-//        }
-    }
-
+    // Call this on the click of reload from Snackbar to install the downloaded update
     fun onComplete() {
         appUpdateManager.completeUpdate()
     }
 
+    /* Unregistering the App Update Manager
+       This is called in the onDestroy() of MainActivity
+     */
     fun onDestroy() {
         appUpdateManager.unregisterListener(this)
     }
 
+    // Shows the Snackbar to reload the App after the update is Downloaded
     override fun onStateUpdate(state: InstallState) {
         if (state.installStatus() == InstallStatus.DOWNLOADED) {
-            showCompleteUpdateDialog()
+            onFlexibleUpdateDownloaded(true)
         }
     }
-
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == myRequestCode) {
-            if (resultCode != AppCompatActivity.RESULT_OK) {
-                // If the update is cancelled or fails, you can request to start the update again.
-                Log.e("ERROR", "Update flow failed! Result code: $resultCode")
-            }
-        }
-    }
-}
-
-@Composable
-fun MyDialog(appUpdateManager: InAppUpdateManager) {
-    Dialog(
-        onDismissRequest = { /*TODO*/ },
-        content = {
-            Column {
-                Button(onClick = { appUpdateManager.onComplete() }) {
-                    Text(text = "Update", color = white, fontSize = 24.sp)
-                }
-            }
-        }
-    )
 }

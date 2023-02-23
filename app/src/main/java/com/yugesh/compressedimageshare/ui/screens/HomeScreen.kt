@@ -1,12 +1,10 @@
 package com.yugesh.compressedimageshare.ui.screens
 
-import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.yugesh.compressedimageshare.BuildConfig
 import com.yugesh.compressedimageshare.R
 import com.yugesh.compressedimageshare.ui.components.AddImagesBoxButton
@@ -43,17 +43,19 @@ import com.yugesh.compressedimageshare.ui.components.DetailsDialog
 import com.yugesh.compressedimageshare.ui.components.SelectedImagesGrid
 import com.yugesh.compressedimageshare.ui.components.ShareButton
 import com.yugesh.compressedimageshare.ui.theme.CompressedImageSharingTheme
+import com.yugesh.compressedimageshare.ui.utils.CIScaffoldDefaults
 import com.yugesh.compressedimageshare.util.toKbOrMb
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
-    analytics: FirebaseAnalytics,
-    activity: Activity,
+    onAppUpdateSnackBarReloadClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isFlexibleUpdateDownloaded: Boolean,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
     val homeScreenUiState by viewModel.homeScreenUiState.collectAsStateWithLifecycle()
     val showDetailsDialog by viewModel.showDetailsDialog.collectAsStateWithLifecycle()
@@ -93,8 +95,24 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        scaffoldState = scaffoldState,
+        snackbarHost = { CIScaffoldDefaults.GetSnackBarHost(snackbarHostState = it) },
         backgroundColor = CompressedImageSharingTheme.colors.uiBackgroundPrimary
     ) { paddingValues ->
+        LaunchedEffect(key1 = isFlexibleUpdateDownloaded) {
+            if (isFlexibleUpdateDownloaded) {
+                val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.compress_it_update_downloaded),
+                    actionLabel = context.getString(R.string.reload),
+                    duration = SnackbarDuration.Indefinite
+                )
+                when (snackBarResult) {
+                    SnackbarResult.ActionPerformed -> onAppUpdateSnackBarReloadClick()
+                    SnackbarResult.Dismissed -> {}
+                }
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()

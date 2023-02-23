@@ -10,4 +10,6 @@
     <string name="share_images">Share Images</string>
     <string name="remove_image">Remove Image</string>
     <string name="placeholder_image">Placeholder Image</string>
+    <string name="compress_it_update_downloaded">Compress It update Downloaded.</string>
+    <string name="reload">Reload</string>
 </resources>

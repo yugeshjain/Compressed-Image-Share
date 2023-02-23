@@ -1,6 +1,5 @@
 package com.yugesh.compressedimageshare.ui.screens
 
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -20,16 +19,14 @@ import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.yugesh.compressedimageshare.BuildConfig
 import com.yugesh.compressedimageshare.R
-import com.yugesh.compressedimageshare.util.Constants.PACKAGE_NAME
-import com.yugesh.compressedimageshare.util.Constants.PROVIDER_EXTENSION
 import com.yugesh.compressedimageshare.dispatchers.CoroutineDispatcherProvider
-import com.yugesh.compressedimageshare.util.AnalyticsManager
 import com.yugesh.compressedimageshare.util.Constants.COMPRESSED_IMAGE_EXTENSION
 import com.yugesh.compressedimageshare.util.Constants.COMPRESSED_IMAGE_PREFIX
+import com.yugesh.compressedimageshare.util.Constants.PACKAGE_NAME
+import com.yugesh.compressedimageshare.util.Constants.PROVIDER_EXTENSION
 import com.yugesh.compressedimageshare.util.Constants.TEMP_FILE_EXTENSION
 import com.yugesh.compressedimageshare.util.Constants.TEMP_FILE_PREFIX
 import com.yugesh.compressedimageshare.util.inappupdates.AppUpdateState
-import com.yugesh.compressedimageshare.util.inappupdates.InAppUpdateManager
 import com.yugesh.compressedimageshare.util.inappupdates.InAppUpdatesConstants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
@@ -58,7 +55,8 @@ class HomeViewModel @Inject constructor(
     val homeScreenUiState: StateFlow<HomeScreenUiState> =
         _homeScreenUiState.asStateFlow()
 
-    val something = MutableStateFlow(false)
+    private val _flexibleUpdateDownloaded = MutableStateFlow(false)
+    val flexibleUpdateDownloaded: StateFlow<Boolean> = _flexibleUpdateDownloaded.asStateFlow()
 
     private val _showDetailsDialog = MutableStateFlow<Pair<Boolean, Int?>>(Pair(false, null))
     val showDetailsDialog: StateFlow<Pair<Boolean, Int?>> = _showDetailsDialog.asStateFlow()
@@ -67,6 +65,10 @@ class HomeViewModel @Inject constructor(
 
     private val _appUpdateState = MutableStateFlow(Pair(AppUpdateState.LOADING, currentAppVersion))
     val appUpdateState: StateFlow<Pair<AppUpdateState, Long>> = _appUpdateState.asStateFlow()
+
+    fun handleDownloadedFlexibleAppUpdate(isDownloaded: Boolean) {
+        _flexibleUpdateDownloaded.value = isDownloaded
+    }
 
     fun openDetailsDialog(index: Int) {
         _showDetailsDialog.value = Pair(true, index)
@@ -236,14 +238,6 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun appUpdate(activity: Activity){
-        InAppUpdateManager(
-            activity = activity,
-            updateType = AppUpdateState.FORCE,
-            updateVersion = 1000
-        )
     }
 
 }
