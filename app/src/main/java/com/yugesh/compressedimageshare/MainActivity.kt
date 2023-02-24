@@ -11,15 +11,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.google.android.play.core.review.ReviewManager
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.yugesh.compressedimageshare.ui.screens.HomeScreen
 import com.yugesh.compressedimageshare.ui.screens.HomeViewModel
 import com.yugesh.compressedimageshare.ui.theme.CompressedImageSharingTheme
+import com.yugesh.compressedimageshare.ui.utils.InAppReviewManager
 import com.yugesh.compressedimageshare.util.inappupdates.InAppUpdateManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -27,7 +31,8 @@ class MainActivity : ComponentActivity() {
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var inAppUpdate: InAppUpdateManager
     private lateinit var analytics: FirebaseAnalytics
-
+    @Inject
+    lateinit var inAppReviewManager: InAppReviewManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,7 +62,9 @@ class MainActivity : ComponentActivity() {
                     val isFlexibleUpdateDownloaded by viewModel.flexibleUpdateDownloaded.collectAsStateWithLifecycle()
                     HomeScreen(
                         onAppUpdateSnackBarReloadClick = { inAppUpdate.onComplete() },
-                        isFlexibleUpdateDownloaded = isFlexibleUpdateDownloaded
+                        isFlexibleUpdateDownloaded = isFlexibleUpdateDownloaded,
+                        activity = this,
+                        inAppReviewManager = inAppReviewManager
                     )
                 }
             }

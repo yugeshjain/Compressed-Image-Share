@@ -1,10 +1,12 @@
 package com.yugesh.compressedimageshare.ui.screens
 
+import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,11 +46,14 @@ import com.yugesh.compressedimageshare.ui.components.SelectedImagesGrid
 import com.yugesh.compressedimageshare.ui.components.ShareButton
 import com.yugesh.compressedimageshare.ui.theme.CompressedImageSharingTheme
 import com.yugesh.compressedimageshare.ui.utils.CIScaffoldDefaults
+import com.yugesh.compressedimageshare.ui.utils.InAppReviewManager
 import com.yugesh.compressedimageshare.util.toKbOrMb
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
+    activity: Activity,
+    inAppReviewManager: InAppReviewManager,
     onAppUpdateSnackBarReloadClick: () -> Unit,
     modifier: Modifier = Modifier,
     isFlexibleUpdateDownloaded: Boolean,
@@ -129,7 +134,12 @@ fun HomeScreen(
                 Text(
                     text = "COMPRESS IT",
                     style = CompressedImageSharingTheme.typography.title,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+//                            viewModel.initiateInAppReview(activity = activity)
+                            inAppReviewManager.requestReview(activity = context as Activity)
+                        },
                     textAlign = TextAlign.Center
                 )
                 Text(

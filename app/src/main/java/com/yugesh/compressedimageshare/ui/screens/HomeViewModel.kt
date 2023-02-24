@@ -1,5 +1,6 @@
 package com.yugesh.compressedimageshare.ui.screens
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -7,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableStateListOf
@@ -14,6 +16,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.play.core.review.ReviewManager
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -240,6 +244,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun initiateInAppReview(activity: Activity){
+        val reviewManager = ReviewManagerFactory.create(activity)
+        val reviewRequest = reviewManager.requestReviewFlow()
+
+        reviewRequest.addOnCompleteListener { request ->
+            if (request.isSuccessful){
+                val reviewInfo = request.result
+                try {
+                    val reviewFlow = reviewManager.launchReviewFlow(activity, reviewInfo)
+                    reviewFlow.addOnCompleteListener {}
+                } catch (e: Exception){
+                    Log.e("e", e.stackTraceToString())
+                }
+            }
+        }
+    }
 }
 
 /**

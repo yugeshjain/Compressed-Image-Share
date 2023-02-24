@@ -15,8 +15,8 @@ android {
         applicationId "com.yugesh.compressedimageshare"
         minSdk 21
         targetSdk 33
-        versionCode 1024
-        versionName "1.0.24"
+        versionCode 1026
+        versionName "1.0.26"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -118,6 +118,9 @@ dependencies {
     // In-App Updates
     implementation("com.google.android.play:app-update:2.0.1")
     implementation("com.google.android.play:app-update-ktx:2.0.1")
+
+    implementation("com.google.android.play:review:2.0.1")
+    implementation("com.google.android.play:review-ktx:2.0.1")
 
     // Material for Snack bar
     implementation("com.google.android.material:material:1.9.0-alpha01")
