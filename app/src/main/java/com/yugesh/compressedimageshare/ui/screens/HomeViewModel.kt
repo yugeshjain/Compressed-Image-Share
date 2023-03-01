@@ -1,6 +1,5 @@
 package com.yugesh.compressedimageshare.ui.screens
 
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -8,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableStateListOf
@@ -16,8 +14,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.play.core.review.ReviewManager
-import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -51,7 +47,7 @@ class HomeViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider
 ) : ViewModel() {
 
-    var selectedImages: MutableList<CompressedFile> = mutableStateListOf()
+    private var selectedImages: MutableList<CompressedFile> = mutableStateListOf()
 
     // Home Screen Ui State
     private val _homeScreenUiState =
@@ -61,6 +57,12 @@ class HomeViewModel @Inject constructor(
 
     private val _flexibleUpdateDownloaded = MutableStateFlow(false)
     val flexibleUpdateDownloaded: StateFlow<Boolean> = _flexibleUpdateDownloaded.asStateFlow()
+
+    private val _showSettingsDialog = MutableStateFlow(false)
+    val showSettingsDialog: StateFlow<Boolean> = _showSettingsDialog.asStateFlow()
+
+    private val _compressionSliderValue = MutableStateFlow(50)
+    val compressionSliderValue: StateFlow<Int> = _compressionSliderValue.asStateFlow()
 
     private val _showDetailsDialog = MutableStateFlow<Pair<Boolean, Int?>>(Pair(false, null))
     val showDetailsDialog: StateFlow<Pair<Boolean, Int?>> = _showDetailsDialog.asStateFlow()
@@ -82,15 +84,29 @@ class HomeViewModel @Inject constructor(
         _showDetailsDialog.value = Pair(true, null)
     }
 
+    fun openSettingsDialog() {
+        _showSettingsDialog.value = true
+    }
+
+    fun closeSettingsDialog() {
+        _showSettingsDialog.value = false
+    }
+
+    fun updateCompressionValue(compressionValue: Int){
+        _compressionSliderValue.value = compressionValue
+    }
+
     fun compressImages(
         uriList: List<Uri>,
-        context: Context
+        context: Context,
+        quality: Int
     ) {
         _homeScreenUiState.update { it.copy(loading = true) }
         viewModelScope.launch {
             val compressedImagesList = convertFullListAsync(
                 uriList = uriList,
-                context = context
+                context = context,
+                quality = quality
             ).await()
             selectedImages += compressedImagesList
             _homeScreenUiState.update {
@@ -113,12 +129,13 @@ class HomeViewModel @Inject constructor(
 
     private fun convertFullListAsync(
         uriList: List<Uri>,
+        quality: Int,
         context: Context
     ): Deferred<List<CompressedFile>> =
         viewModelScope.async(dispatchers.default) {
             val compressedImagesList = arrayListOf<CompressedFile>()
             uriList.forEach {
-                val convertedFile = it.convertToFileAndCompressAsync(context = context).await()
+                val convertedFile = it.convertToFileAndCompressAsync(context = context, quality = quality).await()
                 compressedImagesList.add(convertedFile)
             }
             compressedImagesList
@@ -126,7 +143,7 @@ class HomeViewModel @Inject constructor(
 
     private fun Uri.convertToFileAndCompressAsync(
         context: Context,
-        quality: Int = 50
+        quality: Int,
     ): Deferred<CompressedFile> =
         viewModelScope.async(dispatchers.io) {
             val imgFile = withContext(Dispatchers.IO) {
@@ -239,23 +256,6 @@ class HomeViewModel @Inject constructor(
                     }
                 } else {
                     Pair(AppUpdateState.NO_UPDATE, currentAppVersion)
-                }
-            }
-        }
-    }
-
-    fun initiateInAppReview(activity: Activity){
-        val reviewManager = ReviewManagerFactory.create(activity)
-        val reviewRequest = reviewManager.requestReviewFlow()
-
-        reviewRequest.addOnCompleteListener { request ->
-            if (request.isSuccessful){
-                val reviewInfo = request.result
-                try {
-                    val reviewFlow = reviewManager.launchReviewFlow(activity, reviewInfo)
-                    reviewFlow.addOnCompleteListener {}
-                } catch (e: Exception){
-                    Log.e("e", e.stackTraceToString())
                 }
             }
         }

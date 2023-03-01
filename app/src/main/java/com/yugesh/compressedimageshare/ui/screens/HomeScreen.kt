@@ -41,7 +41,8 @@ import com.yugesh.compressedimageshare.R
 import com.yugesh.compressedimageshare.ui.components.AddImagesBoxButton
 import com.yugesh.compressedimageshare.ui.components.DetailsDialog
 import com.yugesh.compressedimageshare.ui.components.SelectedImagesGrid
-import com.yugesh.compressedimageshare.ui.components.ShareButton
+import com.yugesh.compressedimageshare.ui.components.HomeScreenBottomFloatingButtons
+import com.yugesh.compressedimageshare.ui.components.SettingsDialog
 import com.yugesh.compressedimageshare.ui.theme.CompressedImageSharingTheme
 import com.yugesh.compressedimageshare.ui.utils.CIScaffoldDefaults
 import com.yugesh.compressedimageshare.ui.utils.InAppReviewManager
@@ -63,6 +64,8 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val homeScreenUiState by viewModel.homeScreenUiState.collectAsStateWithLifecycle()
     val showDetailsDialog by viewModel.showDetailsDialog.collectAsStateWithLifecycle()
+    val showSettingsDialog by viewModel.showSettingsDialog.collectAsStateWithLifecycle()
+    val compressionQuality by viewModel.compressionSliderValue.collectAsStateWithLifecycle()
     val selectedCompressedImages = homeScreenUiState.compressedImages
 
     // Photo Picker
@@ -79,11 +82,12 @@ fun HomeScreen(
         // Gives out Compressed Files
         viewModel.compressImages(
             uriList = selectedImages,
-            context = context
+            context = context,
+            quality = compressionQuality
         )
     }
 
-    LaunchedEffect(key1 = Unit){
+    LaunchedEffect(key1 = Unit) {
         delay(120000)
         inAppReviewManager.requestReview()
     }
@@ -100,6 +104,14 @@ fun HomeScreen(
                 }
             )
         }
+    }
+
+    if (showSettingsDialog) {
+        SettingsDialog(
+            onDismissRequest = {
+                viewModel.closeSettingsDialog()
+            }
+        )
     }
 
     Scaffold(
@@ -200,30 +212,32 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
-            AnimatedVisibility(visible = selectedCompressedImages.isNotEmpty()) {
-                ShareButton(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp, horizontal = 24.dp),
-                    buttonText = stringResource(
-                        if (selectedCompressedImages.size == 1) {
-                            R.string.share_image
-                        } else {
-                            R.string.share_images
-                        }
-                    ),
-                    onClick = {
-                        coroutineScope.launch {
-                            val uriList =
-                                viewModel.getUriListAsync(compressedImages = selectedCompressedImages)
-                                    .await()
-                            viewModel.shareImage(
-                                uriList = uriList,
-                                context = context
-                            )
-                        }
+
+            HomeScreenBottomFloatingButtons(
+                modifier = Modifier.padding(8.dp),
+                buttonText = stringResource(
+                    if (selectedCompressedImages.size == 1) {
+                        R.string.share_image
+                    } else {
+                        R.string.share_images
                     }
-                )
-            }
+                ),
+                onSettingsClick = {
+                    viewModel.openSettingsDialog()
+                },
+                isShareVisible = selectedCompressedImages.isNotEmpty(),
+                onShareClick = {
+                    coroutineScope.launch {
+                        val uriList =
+                            viewModel.getUriListAsync(compressedImages = selectedCompressedImages)
+                                .await()
+                        viewModel.shareImage(
+                            uriList = uriList,
+                            context = context
+                        )
+                    }
+                }
+            )
         }
     }
 }
