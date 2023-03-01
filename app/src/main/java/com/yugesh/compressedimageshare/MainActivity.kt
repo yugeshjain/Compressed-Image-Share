@@ -11,8 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.google.android.play.core.review.ReviewManager
-import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -63,7 +61,6 @@ class MainActivity : ComponentActivity() {
                     HomeScreen(
                         onAppUpdateSnackBarReloadClick = { inAppUpdate.onComplete() },
                         isFlexibleUpdateDownloaded = isFlexibleUpdateDownloaded,
-                        activity = this,
                         inAppReviewManager = inAppReviewManager
                     )
                 }

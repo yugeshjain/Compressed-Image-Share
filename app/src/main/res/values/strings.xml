@@ -12,4 +12,5 @@
     <string name="placeholder_image">Placeholder Image</string>
     <string name="compress_it_update_downloaded">Compress It update Downloaded.</string>
     <string name="reload">Reload</string>
+    <string name="compress_it">COMPRESS IT</string>
 </resources>

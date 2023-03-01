@@ -1,12 +1,10 @@
 package com.yugesh.compressedimageshare.ui.screens
 
-import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,11 +46,12 @@ import com.yugesh.compressedimageshare.ui.theme.CompressedImageSharingTheme
 import com.yugesh.compressedimageshare.ui.utils.CIScaffoldDefaults
 import com.yugesh.compressedimageshare.ui.utils.InAppReviewManager
 import com.yugesh.compressedimageshare.util.toKbOrMb
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun HomeScreen(
-    activity: Activity,
     inAppReviewManager: InAppReviewManager,
     onAppUpdateSnackBarReloadClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -82,6 +81,11 @@ fun HomeScreen(
             uriList = selectedImages,
             context = context
         )
+    }
+
+    LaunchedEffect(key1 = Unit){
+        delay(120000)
+        inAppReviewManager.requestReview()
     }
 
     if (showDetailsDialog.first) {
@@ -132,14 +136,9 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "COMPRESS IT",
+                    text = stringResource(R.string.compress_it),
                     style = CompressedImageSharingTheme.typography.title,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-//                            viewModel.initiateInAppReview(activity = activity)
-                            inAppReviewManager.requestReview(activity = context as Activity)
-                        },
+                    modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
                 Text(

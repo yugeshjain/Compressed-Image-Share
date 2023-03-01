@@ -6,21 +6,23 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import dagger.hilt.android.scopes.ActivityScoped
 
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(ActivityComponent::class)
 object InAppReviewModule {
     @Provides
-    @Singleton
+    @ActivityScoped
     fun provideInAppReviewManager(
-        reviewManager: ReviewManager
-    ): InAppReviewManager = InAppReviewManager(reviewManager)
+        reviewManager: ReviewManager,
+        @ActivityContext context: Context
+    ): InAppReviewManager = InAppReviewManager(reviewManager, context)
 
     @Provides
-    @Singleton
+    @ActivityScoped
     fun provideReviewManager(
         @ApplicationContext context: Context
     ): ReviewManager {

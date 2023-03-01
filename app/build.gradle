@@ -15,8 +15,8 @@ android {
         applicationId "com.yugesh.compressedimageshare"
         minSdk 21
         targetSdk 33
-        versionCode 1026
-        versionName "1.0.26"
+        versionCode 1001
+        versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -44,7 +44,6 @@ android {
     buildTypes {
         release {
             minifyEnabled = false
-            versionNameSuffix = "-release"
             signingConfig = signingConfigs.getByName("release")
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -124,4 +123,6 @@ dependencies {
 
     // Material for Snack bar
     implementation("com.google.android.material:material:1.9.0-alpha01")
+
+    implementation ("androidx.browser:browser:1.5.0")
 }
